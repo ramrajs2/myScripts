@@ -1,0 +1,148 @@
+# export path 
+export ADB_HOME=/Users/ramrajs/Library/Android/sdk/platform-tools
+export MYSQL=/usr/local/mysql/bin/
+export PATH=/usr/local/bin:$PATH:$ADB_HOME:$MYSQL:$HOME/bin:/Users/ramrajs/Library/Android/sdk/build-tools/26.0.1
+#/Users/ramrajs/bin/envImp
+source /etc/brazilcli.env
+export PATH=$BRAZIL_CLI_BIN:$PATH
+
+# Gordian Knot Setup
+export GK_INSTALL_DIR=~/tools/GK_HOME
+. ~/Downloads/create-gk-aliases.sh
+
+# shell shortcuts
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../../'
+alias findf='find . -iname'
+alias apollo='cat ~/.apolloenvs | grep -i '
+
+# adb shortcuts
+alias adde='adb devices'
+alias alog='adb logcat'
+alias shell-restart='adb shell stop && adb shell start'
+
+#git shortcuts
+alias g='git'
+alias gl='git logg'
+alias glog='git log --graph --oneline --decorate --all'
+alias gis='git status'
+alias gd='git diff'
+alias gdc='git diff --cached'
+alias gpr='git pull --rebase'
+alias gs='git show'
+alias gsn='git show --name-status'
+alias gcf='git clean -f'
+alias gb='git branch'
+   # Pull rebase all the sub folders. Run within <brazil-ws>/src
+alias gsync='for i in $(ls); do echo $i && builtin cd $i;git pr ;builtin cd ..; done'
+
+# ssh shortcuts 
+alias sshp="ssh -o ProxyCommand=none"
+alias ubu='ssh 10.45.251.116'
+
+
+# brazil functions
+function bbut() {
+  if [ -z "$1" ]; then
+    brazil-build unit-tests
+  else
+    files=$(find . -name "$1.java")
+    class=$(sed -n "s/^package \(.*\);/\1.$1/p" "$files" 2>/dev/null)
+    if [ -z "$class" ]; then
+      echo "Test class $1.java not found - make sure it's below your current location in the directory structure."
+    elif [ -z "$2" ]; then
+      brazil-build single-unit-test -DtestClass="$class"
+    else
+      brazil-build single-unit-test -DtestClass="$class" -DtestMethods="$2"
+    fi
+  fi
+}
+
+# Functions
+function mkcd() {
+	mkdir -p $1 && cd $1
+}
+
+function gdir()
+{
+    if [[ -z "$1" ]]; then
+        echo "Usage: godir <regex>";
+        return;
+    fi;
+    if [[ -z "$2" ]]; then
+        T=~/Documents/Whispersync;
+    else
+        T=$2;
+    fi;
+    builtin cd $T;
+    local lines;
+    depth=" -mindepth 2 -maxdepth 3";
+    # lines=($(find . $depth -type d | grep src | grep -i "$1"));
+    lines=($(find ./*/src ./*/*/src  -type d -iname "*$1*"));
+    if [[ ${#lines[@]} = 0 ]]; then
+        echo "No directories found with the key $1 in the directory $T" | grep --color=auto -i "$1";
+        builtin cd - && return;
+    fi;
+    local pathname;
+    local choice=1;
+    local isBash=$(echo $0 | grep 'bash')
+    if [[ ${#lines[@]} > 1 ]]; then
+        while [[ -z "$pathname" ]]; do
+            local index=1;
+            local line;
+            for line in ${lines[@]};
+            do
+                echo "[$index] $line" | grep --color=auto -i $1;
+                index=$(($index + 1));
+            done;
+            echo;
+            echo -n "Select one: ";
+            unset choice;
+            read choice;
+            if [[ $choice -gt ${#lines[@]} || $choice -lt 1 ]]; then
+                echo "Invalid choice";
+                continue;
+            fi;
+            # array index starts from 0 in bash and 1 in zsh
+            if [[ ! -z "$isBash" ]]; then
+                    pathname=${lines[$(($choice-1))]};
+            else
+                    pathname=${lines[$(($choice))]};
+            fi;
+        done;
+    else
+        if [[ ! -z "$isBash" ]]; then
+                pathname=${lines[0]};
+        else
+                pathname=${lines[1]};
+        fi;
+    fi;
+
+    #folder=$(find $T $depth -type d | grep "$pathname")
+    echo Switching to Directory : $pathname | grep --color=auto -i "$1";
+    cd $pathname
+}
+
+function cd {
+    builtin cd "$@" && echo "ls $(pwd)" && ls -lrt
+}
+
+function loadgenhost() {
+	host=$(sed "$num q;d" hosts.txt)
+#	host = $(sed "$1 q;d" /Users/ramrajs/Documents/Official/internalGameday/hosts.txt)
+	echo $host
+	ssh $host
+}
+
+function o() {
+
+    lines=($(findf "*$1*"));
+    if [[ ${#lines[@]} = 1 ]]; then
+        echo $lines;
+        vim $lines;
+    else
+	echo "Following matches found: "
+        findf "*$1*"
+    fi;
+}
