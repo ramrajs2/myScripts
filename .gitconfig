@@ -1,0 +1,82 @@
+[user]
+	email = ramrajs@
+	name = Ramraj S
+[color]
+	ui = auto
+[core]
+	pager = less -FMRiX
+	excludesfile = /Users/ramrajs/.gitconfig
+	editor = vim
+[push]
+	default = simple
+[alias]
+    co = checkout
+    nb = checkout -b #new branch
+    logg = log --pretty=format:\"%h - %cd - %s -----> %an / %cn\"
+    loggg = log --pretty=format:\"%h ? %cd ? %an ?% cn\"
+    l = log --pretty=format:\"%h - %cd - %s -----> %an / %cn\" -10
+    st = status
+    b = branch -v
+    r = remote -v
+    t = tag -l
+
+    hreset = reset --hard HEAD
+    unstage = reset HEAD #undo git add
+    uncommit = reset --soft HEAD^ #undo git commit
+    unreset = reset HEAD@{1} #undo one level of git reset
+    restore = checkout -f #throws away all your index and ws files
+    # to uncommit a single file do: git co [commit-ref] -- file-name
+
+    latest-patch = format-patch HEAD^ #append with --stdout > /tmp/patch.name
+
+	d = difftool
+    dc = diff --cached #diff against index
+
+    amend = commit --amend
+    ammend = commit --amend #false sense of spell correct
+    qamend = commit --amend -C HEAD #use HEAD's msg, avoid a trip to the editor
+
+    changes = log --pretty=format:\"%h %cr %cn %Cgreen%s%Creset\" --name-status
+    short = log --pretty=format:\"%h %cr %cn %Cgreen%s%Creset\"
+    filelog = log -u  # show changes to a file
+    changelog = log --pretty=format:\" * %s\"
+
+    graph = log --graph --oneline --all --abbrev-commit --decorate
+    pr=pull --rebase
+	getalias = config --list | grep alias
+	ac = apply --check
+	s = show
+	bl = blame
+	whatadded = log --diff-filter=A
+	rhd = "reset --hard "
+	whatdeleted = log --diff-filter=D
+	dw = diff
+	dag = log --graph --format='format:%C(yellow)%h%C(reset) %C(blue)\"%an\" <%ae>%C(reset) %C(magenta)%cr%C(reset)%C(auto)%d%C(reset)%n%s' --date-order
+	br = branch
+	dag = log --graph --format='format:%C(yellow)%h%C(reset) %C(blue)\"%an\" <%ae>%C(reset) %C(magenta)%cr%C(reset)%C(auto)%d%C(reset)%n%s' --date-order
+	hr = reset --hard
+	ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
+	ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+	lnc = log --pretty=format:"%h\\ %s\\ [%cn]"
+	lds = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
+	ld = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
+	cp = cherry-pick
+	st = status -s
+	cl = clone
+	ci = commit
+	co = checkout
+	br = branch 
+	diff = diff --word-diff
+	dc = diff --cached
+	amend = commit --amend
+[diff]
+	tool = vimdiff
+[difftool]
+	prompt = false
+[merge]
+	tool = p4mergetool
+[mergetool "p4mergetool"]
+	cmd = /Applications/p4merge.app/Contents/Resources/launchp4merge $PWD/$BASE $PWD/$REMOTE $PWD/$LOCAL $PWD/$MERGED
+	trustExitCode = false
+[mergetool]
+	keepBackup = false
