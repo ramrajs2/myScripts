@@ -1,0 +1,143 @@
+. ~/.kuberc
+
+
+# shell shortcuts
+
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../../'
+alias findf='find . -iname'
+alias google='web_search google'
+
+#git shortcuts
+alias g='git'
+alias gl='git logg'
+alias glog='git log --graph --oneline --decorate --all'
+alias gis='git status'
+alias gd='git diff'
+alias gdc='git diff --cached'
+alias gpr='git pull --rebase'
+alias gs='git show'
+alias gsn='git show --name-status'
+alias gcf='git clean -f'
+alias gb='git branch'
+
+alias curlstatus='curl -s -o /dev/null -w "%{http_code}" '
+
+# Functions
+function mkcd() {
+	mkdir -p $1 && cd $1
+}
+
+function cd {
+    builtin cd "$@" && echo "ls $(pwd)" && ls -lrt
+}
+
+function scp_file() {
+    if [ $# -ne 1 ]; then
+        echo "Error: Provide the file path as an argument"
+        return 1
+    fi
+
+    local src_path=$1
+    local dest_user="ramraj"
+    local dest_ip="10.22.74.72"
+
+    scp $src_path $dest_user@$dest_ip:/home/ramraj/scp/
+}
+
+function rscp_file() {
+    if [ $# -ne 1 ]; then
+        echo "Error: Provide the file path as an argument"
+        return 1
+    fi
+
+    local src_path=$1
+    local dest_user="ramraj"
+    local dest_ip="10.22.74.72"
+
+    scp $dest_user@$dest_ip:/home/ramraj/scp/$src_path . 
+}
+
+function hcc() {
+    if [ -z "$1" ]; then
+      echo "Please enter producer name "
+      return 1
+    fi
+
+    echo helm install ramraj-consumer-$1 . -f values-consumer-cpu.yaml    
+    helm install ramraj-consumer-$1 . -f values-consumer-cpu.yaml    
+    kgpow
+}
+
+function hcg() {
+    if [ -z "$1" ]; then
+      echo "Please enter producer name "
+      return 1
+    fi
+
+    echo helm install ramraj-gpu-consumer-$1 . -f values-consumer-elements.yaml
+    helm install ramraj-gpu-consumer-$1 . -f values-consumer-elements.yaml
+    kgpow
+}
+
+function hp() {
+    if [ -z "$1" ]; then
+      echo "Please enter producer name "
+      return 1
+    fi
+
+    echo helm install ramraj-producer-$1 . -f values-producer.yaml
+    helm install ramraj-producer-$1 . -f values-producer.yaml
+    kgpow
+}
+
+
+function fp() {
+    kgpo | grep $1
+}
+
+function fpn() {
+    kgpo | grep $1 | awk '{print $1}' 
+}
+
+function hdc() {
+    kgpo | grep $1 | grep -i completed | sed 's/-llama-factory.*//g' | sort | uniq | xargs -I{} bash -c 'echo helm delete {} &&  helm delete {}' 
+}
+
+function hd() {
+    kgpo | grep $1 | sed 's/-llama-factory.*//g' | sort | uniq | xargs -I{} bash -c 'echo helm delete {} &&  helm delete {}' 
+}
+
+function klog() {
+ if [ $# -lt 1 ]; then
+    echo "Usage: $0 'str1' 'str2' 'str3'"
+    exit 1
+  fi
+
+  kgpo_output=$(kgpo)
+  if [ $? -ne 0 ]; then
+    echo "kgpo command failed with exit code $?"
+    return 1
+  fi
+
+  filtered_output=$kgpo_output
+  for str in "$@"; do
+    filtered_output=$(echo "$filtered_output" | grep -i $str)
+  done
+
+  pods=$(echo "$filtered_output" | awk '{print $1}')
+  echo "Filtered Pods:"
+  echo $pods
+  echo $pods | xargs -I{} bash -c 'echo -e "\n==== {} ====" && kubectl logs -f {}'
+}
+
+alias devconfig='rm -rf config/secrets/* && cp ~/workspace/secrets/dev/* config/secrets/ && echo complete'
+alias prodconfig='rm -rf config/secrets/* && cp ~/workspace/secrets/prod/* config/secrets/ && echo complete'
+
+
+# curl commands
+alias cget='curl -i -X GET'
+alias cpost='curl -i -X POST -H "Content-Type: application/json" '
+alias cdelete='curl -i -X DELETE '
+alias cput='curl -i -X PUT'
